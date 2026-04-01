@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>학교폭력 예방교육 퀴즈</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #111; }
+.app { max-width: 700px; margin: 0 auto; padding: 1rem; }
+.header { background: #111; color: #fff; padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 1.25rem; }
+.header h1 { font-size: 17px; font-weight: 600; }
+.header p { font-size: 12px; opacity: 0.6; margin-top: 2px; }
+.tab-bar { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+.tab { padding: 8px 16px; font-size: 13px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; color: #555; }
+.tab.active { background: #111; color: #fff; border-color: #111; font-weight: 500; }
+.panel { display: none; }
+.panel.active { display: block; }
+.card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+.name-form { max-width: 360px; margin: 1.5rem auto; text-align: center; }
+.name-form h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.name-form p { font-size: 14px; color: #666; margin-bottom: 1.25rem; line-height: 1.6; }
+input, select { width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 10px; background: #fff; color: #111; }
+.btn { padding: 11px 20px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #111; font-size: 14px; cursor: pointer; font-weight: 500; }
+.btn:hover { background: #f5f5f5; }
+.btn-primary { background: #111; color: #fff; border-color: #111; }
+.btn-primary:hover { background: #333; }
+.quiz-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.quiz-meta span { font-size: 13px; color: #666; }
+.progress-bar { height: 4px; background: #eee; border-radius: 2px; margin-bottom: 1.25rem; }
+.progress-fill { height: 100%; background: #111; border-radius: 2px; transition: width 0.3s; }
+.q-num { font-size: 12px; color: #999; margin-bottom: 6px; }
+.q-text { font-size: 16px; font-weight: 500; line-height: 1.6; margin-bottom: 1rem; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.opt { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid #e5e5e5; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.15s; }
+.opt:hover { background: #f9f9f9; }
+.opt.selected { border-color: #111; background: #f5f5f5; }
+.opt.correct { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+.opt.wrong { border-color: #D85A30; background: #FAECE7; color: #4A1B0C; }
+.opt-letter { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.result-box { text-align: center; padding: 2rem; background: #f9f9f9; border-radius: 12px; margin-bottom: 1rem; }
+.result-score { font-size: 52px; font-weight: 700; }
+.result-sub { font-size: 14px; color: #666; margin-top: 4px; }
+.perfect-badge { display: inline-block; margin-top: 12px; padding: 6px 18px; background: #E1F5EE; color: #085041; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+.stat-card { background: #f9f9f9; border-radius: 10px; padding: 1rem; }
+.stat-label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.stat-val { font-size: 22px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-weight: 500; font-size: 12px; color: #999; }
+td { padding: 10px 10px; border-bottom: 1px solid #f0f0f0; }
+.badge-perfect { display: inline-block; padding: 2px 8px; background: #E1F5EE; color: #085041; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.badge-pass { display: inline-block; padding: 2px 8px; background: #E6F1FB; color: #042C53; border-radius: 8px; font-size: 11px; }
+.qr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.qr-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; text-align: center; }
+.qr-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+.qr-card p { font-size: 12px; color: #999; margin-bottom: 12px; }
+.qr-box { width: 140px; height: 140px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; }
+.qr-url { font-size: 10px; color: #aaa; word-break: break-all; margin-top: 6px; }
+.info-box { background: #f9f9f9; border-radius: 8px; padding: 1rem; font-size: 13px; color: #666; line-height: 1.6; margin-top: 1rem; }
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .tab { padding: 7px 12px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>학교폭력 예방교육 퀴즈</h1>
+    <p>선린인터넷고등학교 소프트웨어과 3학년</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('quiz', this)">학생 퀴즈</button>
+    <button class="tab" onclick="switchTab('qr', this)">QR 코드</button>
+    <button class="tab" onclick="switchTab('stats', this)">통계</button>
+  </div>
+
+  <!-- 퀴즈 탭 -->
+  <div id="tab-quiz" class="panel active">
+    <div id="step-name">
+      <div class="name-form">
+        <h2>학교폭력 예방교육 퀴즈</h2>
+        <p>영상을 시청한 후 퀴즈에 응답해 주세요.<br>반과 이름을 입력하고 시작하세요.</p>
+        <select id="sel-episode">
+          <option value="1">1편 — 신체·언어폭력</option>
+          <option value="2">2편 — 방관의 의미</option>
+          <option value="3">3편 — 신고와 방어자</option>
+        </select>
+        <input id="inp-class" placeholder="반 (예: 3-1반)" />
+        <input id="inp-name" placeholder="이름" />
+        <button class="btn btn-primary" style="width:100%;margin-top:4px;" onclick="startQuiz()">퀴즈 시작 →</button>
+      </div>
+    </div>
+
+    <div id="step-quiz" style="display:none;">
+      <div class="quiz-meta">
+        <span id="ep-title" style="font-weight:600;font-size:15px;"></span>
+        <span id="q-counter">1 / 10</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog" style="width:10%"></div></div>
+      <div id="question-area"></div>
+      <div class="nav-row">
+        <button class="btn" onclick="prevQ()" id="btn-prev" style="visibility:hidden;">← 이전</button>
+        <button class="btn btn-primary" onclick="nextQ()" id="btn-next">다음 →</button>
+      </div>
+    </div>
+
+    <div id="step-result" style="display:none;">
+      <div class="result-box">
+        <div class="result-score" id="res-score"></div>
+        <div class="result-sub" id="res-name"></div>
+        <div id="res-badge"></div>
+      </div>
+      <div id="review-area"></div>
+      <div style="text-align:center;margin-top:1.25rem;">
+        <button class="btn" onclick="resetQuiz()">처음으로</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR 탭 -->
+  <div id="tab-qr" class="panel">
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">QR 코드 — 학급 배포용</div>
+      <div style="font-size:13px;color:#666;">화면에 띄우거나 인쇄하여 학생들에게 배포하세요.</div>
+    </div>
+    <div class="qr-grid" id="qr-section"></div>
+    <div class="info-box">
+      이 파일을 GitHub Pages에 올리면 실제 QR코드로 학생들이 스마트폰으로 접속할 수 있습니다.
+    </div>
+  </div>
+
+  <!-- 통계 탭 -->
+  <div id="tab-stats" class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="font-size:15px;font-weight:600;">응답 현황 대시보드</div>
+      <button class="btn" style="font-size:12px;padding:6px 12px;" onclick="clearStats()">초기화</button>
+    </div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:0.75rem;">100점 만점 정답자 🏆</div>
+      <div id="winners-area"></div>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:0.75rem;">전체 응답 목록</div>
+      <div id="all-responses"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUIZZES = {
+  1: {
+    title: "1편 — 신체·언어폭력",
+    questions: [
+      { q: "농구선수 A씨가 학교폭력 의혹이 밝혀진 후 받게 될 것으로 예상된 처분은?", opts: ["포상", "대명처분", "전학권고", "사과문 발표"], ans: 1 },
+      { q: "피해자가 온라인에 졸업장과 함께 공개한 정보는?", opts: ["익명", "실명", "학번", "담임 이름"], ans: 1 },
+      { q: "가해 학생 김태우가 김민규를 부른 모욕적인 별명은?", opts: ["꼴통", "골대", "종이", "허수아비"], ans: 1 },
+      { q: "김태우가 김민규에게 가한 폭력 유형 중 신체폭력 외 해당하는 것은?", opts: ["사이버폭력", "언어폭력", "집단따돌림", "금품갈취"], ans: 1 },
+      { q: "김민규가 신고를 망설인 이유로 영상에서 언급된 것은?", opts: ["증거가 많아서", "찍은 사람이 없어서", "선생님이 말렸기 때문에", "부모님이 반대해서"], ans: 1 },
+      { q: "친구가 김민규에게 피해 사실을 보존해 두라고 한 이유는?", opts: ["추억으로 남기기 위해", "언제든 신고할 수 있게", "가해자를 협박하기 위해", "기록 과제 제출을 위해"], ans: 1 },
+      { q: "친구가 김민규에게 촉구한 행동으로 올바른 것은?", opts: ["가해자에게 복수하라", "증거를 모으고 가만히 있지 말라", "학교를 그만두라", "부모님께 비밀로 하라"], ans: 1 },
+      { q: "학교폭력 현장에서 목격하고도 아무 행동을 취하지 않는 학생을 무엇이라 하는가?", opts: ["피해자", "방관자", "중재자", "목격자"], ans: 1 },
+      { q: "피해자 편에 서서 신고를 권유하거나 도움을 주는 학생을 무엇이라 하는가?", opts: ["방관자", "가해자", "방어자", "중립자"], ans: 2 },
+      { q: "학교폭력 피해를 당했을 때 가장 먼저 해야 할 행동은?", opts: ["혼자 참고 견딘다", "가해자에게 맞선다", "믿을 수 있는 어른이나 기관에 알린다", "SNS에 공개한다"], ans: 2 }
+    ]
+  },
+  2: {
+    title: "2편 — 방관의 의미",
+    questions: [
+      { q: "방송부 아나운서가 이날 방송에서 다룬 핵심 주제는?", opts: ["사이버폭력", "방관", "신고절차", "학교규칙"], ans: 1 },
+      { q: "아나운서가 인용한 실제 피해자의 말에 따르면, 피해자에게 가해자만큼 원망스러운 존재는?", opts: ["담임교사", "방관자", "학교장", "학부모"], ans: 1 },
+      { q: "아나운서가 방관이 피해자에게 남긴다고 강조한 상처의 성격은?", opts: ["일시적", "치명적", "가벼운", "무시할 수 있는"], ans: 1 },
+      { q: "김민규가 '이길 생각 없어'라고 말하는 것은 어떤 심리를 보여주는가?", opts: ["자신감", "학습된 무기력", "분노", "기대감"], ans: 1 },
+      { q: "친구가 '신고하고 싶으면 네가 해'라고 말하는 장면에서 나타나는 현상은?", opts: ["적극적 개입", "책임 전가(방관자 효과)", "용기있는 행동", "협동심"], ans: 1 },
+      { q: "방관자가 '가만히 있는 게 덜 맞는 거니까'라고 말하는 것은 무엇을 보여주는가?", opts: ["용기있는 판단", "자기 합리화", "현명한 선택", "올바른 대처"], ans: 1 },
+      { q: "후배 학생이 선배에게 촉구한 행동은?", opts: ["도망가기", "뭐라도 하기", "그냥 넘기기", "가해자 편들기"], ans: 1 },
+      { q: "'나쁜 건 걔인데 왜 우리만 욕 먹고'라는 대사가 보여주는 것은?", opts: ["학교폭력의 공정함", "학교폭력의 부조리한 구조", "피해자의 잘못", "방관자의 정당성"], ans: 1 },
+      { q: "영상 말미 '뭐라도 해볼게'는 어떤 전환을 상징하는가?", opts: ["가해자에서 피해자", "방관자에서 방어자", "학생에서 교사", "피해자에서 가해자"], ans: 1 },
+      { q: "다수가 있을수록 개인의 개입 의지가 줄어드는 현상을 무엇이라 하는가?", opts: ["집단지성", "방관자 효과", "동조현상", "군중심리"], ans: 1 }
+    ]
+  },
+  3: {
+    title: "3편 — 신고와 방어자",
+    questions: [
+      { q: "김민규가 학교 방송을 통해 찾은 사람은?", opts: ["가해자의 친구", "현장을 촬영한 학생", "담임 선생님", "학교폭력 위원"], ans: 1 },
+      { q: "김민규가 목격자를 찾은 이유는?", opts: ["복수하기 위해", "증거를 확보하기 위해", "친구를 사귀기 위해", "방송을 하기 위해"], ans: 1 },
+      { q: "김민규가 방송 사연 말미에 주변 학생들에게 한 호소는?", opts: ["가해자를 도와달라", "방관하지 말아달라", "비밀을 지켜달라", "학교를 욕해달라"], ans: 1 },
+      { q: "선생님이 '증거 없어도 학교에 말하면 된다'고 한 이유는?", opts: ["증거가 필요 없어서", "학교가 조사 의무를 지기 때문에", "가해자가 착해서", "법이 없어서"], ans: 1 },
+      { q: "김민규가 신고를 결심하게 된 결정적 계기는?", opts: ["선생님의 강요", "단 한 명의 친구가 도와준 것", "부모님의 설득", "가해자의 사과"], ans: 1 },
+      { q: "선생님이 '학교도 믿어줘'라고 말한 의미는?", opts: ["학교가 가해자 편이라는 뜻", "학교가 피해자를 보호하는 안전망임을 의미", "선생님만 믿으라는 뜻", "법적 책임이 없다는 뜻"], ans: 1 },
+      { q: "방관자 새빛이 선생님에게 한 잘못된 주장은?", opts: ["아무것도 안 했으니 잘못이 없다", "가해자를 도왔다", "피해자를 괴롭혔다", "신고를 방해했다"], ans: 0 },
+      { q: "'아무것도 안 했으니 죄가 없다'는 방관자의 생각은 어떤 오류인가?", opts: ["책임 강화 오류", "방관의 자기합리화 착각", "피해자 비난 오류", "집단동조 오류"], ans: 1 },
+      { q: "선생님이 새빛에게 '방관이 더 원망스럽다고 네가 직접 말했잖아'라고 한 의도는?", opts: ["새빛을 칭찬하기 위해", "새빛 스스로의 모순을 깨닫게 하기 위해", "방송 내용을 무시하기 위해", "새빛의 말을 인용 보고하기 위해"], ans: 1 },
+      { q: "이 시리즈 전체가 강조하는 학교폭력 해결의 핵심 행동 3가지를 포함한 것은?", opts: ["참기, 숨기, 피하기", "신고하기, 도움 구하기, 학교 믿기", "복수하기, 폭로하기, 협박하기", "침묵하기, 혼자 해결하기, 기다리기"], ans: 1 }
+    ]
+  }
+};
+
+let responses = [];
+try { responses = JSON.parse(localStorage.getItem('hq_responses') || '[]'); } catch(e) {}
+function saveResponses() { try { localStorage.setItem('hq_responses', JSON.stringify(responses)); } catch(e) {} }
+
+let curEp, curQ, answers, studentName, studentClass;
+
+function switchTab(t, el) {
+  document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + t).classList.add('active');
+  if (t === 'stats') renderStats();
+  if (t === 'qr') renderQR();
+}
+
+function startQuiz() {
+  studentName = document.getElementById('inp-name').value.trim();
+  studentClass = document.getElementById('inp-class').value.trim();
+  if (!studentName || !studentClass) { alert('반과 이름을 모두 입력해 주세요.'); return; }
+  curEp = parseInt(document.getElementById('sel-episode').value);
+  curQ = 0;
+  answers = new Array(10).fill(-1);
+  document.getElementById('step-name').style.display = 'none';
+  document.getElementById('step-quiz').style.display = 'block';
+  document.getElementById('ep-title').textContent = QUIZZES[curEp].title;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUIZZES[curEp].questions[curQ];
+  document.getElementById('q-counter').textContent = (curQ + 1) + ' / 10';
+  document.getElementById('prog').style.width = ((curQ + 1) / 10 * 100) + '%';
+  document.getElementById('btn-prev').style.visibility = curQ > 0 ? 'visible' : 'hidden';
+  document.getElementById('btn-next').textContent = curQ === 9 ? '제출하기' : '다음 →';
+  const letters = ['①', '②', '③', '④'];
+  let html = '<div class="card"><div class="q-num">문제 ' + (curQ + 1) + '</div>';
+  html += '<div class="q-text">' + q.q + '</div><div class="options">';
+  q.opts.forEach((o, i) => {
+    const sel = answers[curQ] === i ? ' selected' : '';
+    html += '<div class="opt' + sel + '" onclick="selectOpt(' + i + ')"><span class="opt-letter">' + letters[i] + '</span>' + o + '</div>';
+  });
+  html += '</div></div>';
+  document.getElementById('question-area').innerHTML = html;
+}
+
+function selectOpt(i) { answers[curQ] = i; renderQuestion(); }
+function prevQ() { if (curQ > 0) { curQ--; renderQuestion(); } }
+
+function nextQ() {
+  if (answers[curQ] === -1) { alert('답을 선택해 주세요.'); return; }
+  if (curQ < 9) { curQ++; renderQuestion(); }
+  else submitQuiz();
+}
+
+function submitQuiz() {
+  const qs = QUIZZES[curEp].questions;
+  let score = 0;
+  answers.forEach((a, i) => { if (a === qs[i].ans) score++; });
+  const pct = score * 10;
+  const record = { name: studentName, class: studentClass, ep: curEp, score: pct, time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}), answers: [...answers] };
+  responses.push(record);
+  saveResponses();
+  document.getElementById('step-quiz').style.display = 'none';
+  document.getElementById('step-result').style.display = 'block';
+  document.getElementById('res-score').textContent = pct + '점';
+  document.getElementById('res-name').textContent = studentClass + ' ' + studentName + ' (' + QUIZZES[curEp].title + ')';
+  document.getElementById('res-badge').innerHTML = score === 10 ? '<div class="perfect-badge">🏆 만점! 상품 대상자입니다</div>' : '';
+  const letters = ['①', '②', '③', '④'];
+  let rev = '<div style="margin-top:1rem;"><div style="font-size:15px;font-weight:600;margin-bottom:0.75rem;">정답 확인</div>';
+  qs.forEach((q, i) => {
+    const correct = answers[i] === q.ans;
+    rev += '<div class="card" style="margin-bottom:0.75rem;"><div class="q-num">문제 ' + (i+1) + (correct ? ' ✓ 정답' : ' ✗ 오답') + '</div>';
+    rev += '<div class="q-text">' + q.q + '</div><div class="options">';
+    q.opts.forEach((o, j) => {
+      let cls = '';
+      if (j === q.ans) cls = ' correct';
+      else if (j === answers[i] && !correct) cls = ' wrong';
+      rev += '<div class="opt' + cls + '"><span class="opt-letter">' + letters[j] + '</span>' + o + '</div>';
+    });
+    rev += '</div></div>';
+  });
+  rev += '</div>';
+  document.getElementById('review-area').innerHTML = rev;
+}
+
+function resetQuiz() {
+  document.getElementById('step-result').style.display = 'none';
+  document.getElementById('step-name').style.display = 'block';
+  document.getElementById('inp-name').value = '';
+}
+
+function renderStats() {
+  const total = responses.length;
+  const avg = total ? Math.round(responses.reduce((s, r) => s + r.score, 0) / total) : 0;
+  const perfect = responses.filter(r => r.score === 100);
+  const by = [1,2,3].map(e => responses.filter(r => r.ep === e).length);
+  document.getElementById('stats-grid').innerHTML =
+    '<div class="stat-card"><div class="stat-label">전체 응답자</div><div class="stat-val">' + total + '명</div></div>' +
+    '<div class="stat-card"><div class="stat-label">평균 점수</div><div class="stat-val">' + avg + '점</div></div>' +
+    '<div class="stat-card"><div class="stat-label">100점 만점자</div><div class="stat-val">' + perfect.length + '명</div></div>' +
+    '<div class="stat-card"><div class="stat-label">1편 응답</div><div class="stat-val">' + by[0] + '명</div></div>' +
+    '<div class="stat-card"><div class="stat-label">2편 응답</div><div class="stat-val">' + by[1] + '명</div></div>' +
+    '<div class="stat-card"><div class="stat-label">3편 응답</div><div class="stat-val">' + by[2] + '명</div></div>';
+  document.getElementById('winners-area').innerHTML = perfect.length === 0
+    ? '<p style="font-size:14px;color:#999;">아직 100점 응답자가 없습니다.</p>'
+    : '<table><thead><tr><th>이름</th><th>반</th><th>편</th><th>시간</th></tr></thead><tbody>' +
+      perfect.map(r => '<tr><td><strong>' + r.name + '</strong></td><td>' + r.class + '</td><td>' + r.ep + '편</td><td>' + r.time + '</td></tr>').join('') +
+      '</tbody></table>';
+  document.getElementById('all-responses').innerHTML = responses.length === 0
+    ? '<p style="font-size:14px;color:#999;">아직 응답이 없습니다.</p>'
+    : '<table><thead><tr><th>이름</th><th>반</th><th>편</th><th>점수</th><th>시간</th></tr></thead><tbody>' +
+      responses.slice().reverse().map(r =>
+        '<tr><td>' + r.name + '</td><td>' + r.class + '</td><td>' + r.ep + '편</td><td>' + r.score + '점 ' +
+        (r.score === 100 ? '<span class="badge-perfect">만점</span>' : r.score >= 70 ? '<span class="badge-pass">통과</span>' : '') +
+        '</td><td>' + r.time + '</td></tr>').join('') +
+      '</tbody></table>';
+}
+
+function clearStats() {
+  if (!confirm('모든 응답 데이터를 초기화할까요?')) return;
+  responses = [];
+  saveResponses();
+  renderStats();
+}
+
+function renderQR() {
+  const url = window.location.href.split('?')[0];
+  const section = document.getElementById('qr-section');
+  section.innerHTML = '';
+  [1,2,3].forEach(function(ep) {
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = '<h3>' + ep + '편 퀴즈</h3><p>' + QUIZZES[ep].title + '</p><div id="qr' + ep + '" class="qr-box"></div><div class="qr-url">' + url + '?ep=' + ep + '</div>';
+    section.appendChild(card);
+    setTimeout(function() {
+      try { new QRCode(document.getElementById('qr' + ep), { text: url + '?ep=' + ep, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M }); } catch(e) {}
+    }, 400);
+  });
+}
+
+const urlEp = new URLSearchParams(window.location.search).get('ep');
+if (urlEp && ['1','2','3'].includes(urlEp)) {
+  document.getElementById('sel-episode').value = urlEp;
+}
+</script>
+</body>
+</html>
